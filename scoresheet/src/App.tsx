@@ -198,6 +198,7 @@ function App() {
 
   return (
     <>
+      <h2>Hitters</h2>
       <div className="card">
         <button onClick={() => loadData("week")}>
           Get stats for the last week
@@ -209,7 +210,7 @@ function App() {
           Get stats for today
         </button>
       </div>
-      <p className="read-the-docs">
+      { players && <p className="read-the-docs">
         <table>
           <tr>
             <th>Position</th>
@@ -244,8 +245,9 @@ function App() {
             )
           })}
         </table>
-      </p>
+      </p>}
       <hr />
+      <h2>Pitchers</h2>
       <div className="card">
         <button onClick={() => loadPitcherData("week")}>
           Get stats for the last week
@@ -257,7 +259,7 @@ function App() {
           Get stats for today
         </button>
       </div>
-      <p className="read-the-docs">
+      { pitchers && <p className="read-the-docs">
         <table>
           <tr>
             <th>Position</th>
@@ -272,7 +274,7 @@ function App() {
             <th>ERA</th>
             <th>WHIP</th>
           </tr>
-          { pitchers?.map(stat => {
+          { pitchers.map(stat => {
             return (
               <tr key={stat.id}>
                 <td>{stat.position}</td>
@@ -291,6 +293,7 @@ function App() {
           })}
         </table>
       </p>
+    }
     </>
   )
 }
