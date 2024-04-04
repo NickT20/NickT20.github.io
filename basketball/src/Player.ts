@@ -1,14 +1,15 @@
 import { Dice } from "./Dice";
 
-export class Player {
-    readonly OutsideShooting: number;
-    readonly InsideShooting: number;
-    readonly Defense: number;
-    readonly ShootingTendancy: number; 
-    constructor() {
-        this.OutsideShooting = Dice.RollD20();
-        this.InsideShooting = Dice.RollD20();
-        this.Defense = Dice.RollD20();
-        this.ShootingTendancy = Dice.RollD100();
-    }
+// Change to be more like DND
+export interface Player {
+    // OutsideShooting: number; // Goes up with level
+    // InsideShooting: number;
+    // Defense: number;
+    // ShootingTendancy: number;  // Goes away if playing manually but would need for NPCs
+    Name: string;
+    Agility: number;
+    Speed: number;
+    BallHandling: number;
+    Stamina: number;
+    Defense: number;
 }
