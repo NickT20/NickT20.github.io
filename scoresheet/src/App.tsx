@@ -80,6 +80,105 @@ interface PersonResponse {
   people: People[];
 }
 
+const ryanPitchers = [
+  668678,
+  592866,
+  619242,
+  615698,
+  694297,
+  660853,
+  608371,
+  628452,
+  548384,
+  554431,
+  673513
+]
+
+const ryanHitters = [
+  575929,
+  656555,
+  605141,
+  676395,
+  600869,
+  663611,
+  596019,
+  682928,
+  592885,
+  676475,
+  666181,
+  686217,
+  679032,
+  657088,
+  694192
+]
+
+const poppsPitchers = [
+  663623,
+  607192,
+  640455,
+  548389,
+  676775,
+  663855,
+  640451,
+  642397,
+  656546,
+  552640,
+  621242,
+  593576
+]
+
+const poppsHitters = [
+  553869,
+  672275,
+  607732,
+  547180,
+  663538,
+  641857,
+  669707,
+  673490,
+  621035,
+  666149,
+  641313,
+  664056,
+  641355,
+  624585
+]
+
+const nickPitchers = [
+  675911,
+  676272,
+  518876,
+  506433,
+  572020,
+  666745,
+  621381,
+  666277,
+  663362,
+  664854,
+  643511,
+  681911,
+  657240,
+  547973,
+  663432,
+]
+
+const nickHitters = [
+  672515,
+  542194,
+  624413,
+  608841,
+  663898,
+  676701,
+  669394,
+  605204,
+  642731,
+  666134,
+  665862,
+  686668,
+  641584,
+  666971,
+]
+
 async function getHitterDataAsync(personId: number, range: string): Promise<Player> {
   let dateRange = "";
   switch (range) {
@@ -156,48 +255,57 @@ async function getPitcherDataAsync(personId: number, range: string): Promise<Pit
 function App() {
   const [players, setPlayers] = useState<Player[] | undefined>(undefined);
   const [pitchers, setPitchers] = useState<Pitcher[] | undefined>(undefined);
+  const [user, setUser] = useState<string>("Nick");
 
   const loadData = async (range: string) => {
+    let userPlayers: number[] = [];
+    if (user === 'Nick') {
+      userPlayers = nickHitters;
+    } else if (user === 'Popps') {
+      userPlayers = poppsHitters;
+    } else  {
+      userPlayers = ryanHitters;
+    }
+
     const players = [];
-    players.push(await getHitterDataAsync(672515, range));
-    players.push(await getHitterDataAsync(542194, range));
-    players.push(await getHitterDataAsync(624413, range));
-    players.push(await getHitterDataAsync(608841, range));
-    players.push(await getHitterDataAsync(663898, range));
-    players.push(await getHitterDataAsync(676701, range));
-    players.push(await getHitterDataAsync(669394, range));
-    players.push(await getHitterDataAsync(605204, range));
-    players.push(await getHitterDataAsync(642731, range));
-    players.push(await getHitterDataAsync(666134, range));
-    players.push(await getHitterDataAsync(665862, range));
-    players.push(await getHitterDataAsync(686668, range));
-    players.push(await getHitterDataAsync(641584, range));
-    players.push(await getHitterDataAsync(666971, range));
+
+    for (const userPlayer of userPlayers) {
+      players.push(await getHitterDataAsync(userPlayer, range));
+    }
     setPlayers(players);
   }
 
   const loadPitcherData = async (range: string) => {
-    const players = [];
-    players.push(await getPitcherDataAsync(675911, range));
-    players.push(await getPitcherDataAsync(676272, range));
-    players.push(await getPitcherDataAsync(518876, range));
-    players.push(await getPitcherDataAsync(506433, range));
-    players.push(await getPitcherDataAsync(572020, range));
-    players.push(await getPitcherDataAsync(666745, range));
-    players.push(await getPitcherDataAsync(621381, range));
-    players.push(await getPitcherDataAsync(666277, range));
-    players.push(await getPitcherDataAsync(663362, range));
-    players.push(await getPitcherDataAsync(664854, range));
-    players.push(await getPitcherDataAsync(643511, range));
-    players.push(await getPitcherDataAsync(681911, range));
-    players.push(await getPitcherDataAsync(657240, range));
-    players.push(await getPitcherDataAsync(547973, range));
-    players.push(await getPitcherDataAsync(663432, range));
+    let userPlayers: number[] = [];
+    if (user === 'Nick') {
+      userPlayers = nickPitchers;
+    } else if (user === 'Popps') {
+      userPlayers = poppsPitchers;
+    } else  {
+      userPlayers = ryanPitchers;
+    }
+
+    const players: Pitcher[] = [];
+
+    for (const userPlayer of userPlayers) {
+      players.push(await getPitcherDataAsync(userPlayer, range));
+    }
+
     setPitchers(players);
   }
 
+  const onOptionChangeHandler = (event: React.ChangeEvent<HTMLSelectElement>) => {
+      setUser(event.currentTarget.value);
+  };
+
   return (
     <>
+      <select onChange={onOptionChangeHandler}>
+        <option>Please choose one option</option>
+          <option key="nick">Nick</option>
+          <option key="ryan">Ryan</option>
+          <option key="popps">Popps</option>
+      </select>
       <h2>Hitters</h2>
       <div className="card">
         <button onClick={() => loadData("week")}>
