@@ -8,212 +8,38 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { Button, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Stack } from '@mui/material';
-
-interface Player {
-  id: number;
-  position: string;
-  name: string;
-  atBats: number;
-  hits: number;
-  homeRuns: number;
-  baseOnBalls: number;
-  avg: number;
-  obp?: number;
-  slg?: number;
-  ops?: number;
-  stolenBases: number;
-  caughtStealing: number;
-}
-
-interface Pitcher {
-  id: number;
-  position?: string;
-  name?: string;
-  gamesPlayed?: number;
-  gamesStarted?: number;
-  inningsPitched?: number;
-  hits?: number;
-  earnedRuns?: number;
-  baseOnBalls?: number;
-  strikeOuts?: number;
-  era?: number;
-  whip?: number;
-}
-
-interface PrimaryPosition {
-  abbreviation: string;
-}
-
-interface PitcherStat {
-  gamesPlayed: string;
-  gamesStarted: string;
-  inningsPitched: number;
-  hits: number;
-  earnedRuns: number;
-  baseOnBalls: number;
-  strikeOuts: number;
-  era: number;
-  whip: number;
-}
-
-interface Stat {
-  atBats: number;
-  hits: number;
-  homeRuns: number;
-  baseOnBalls: number;
-  avg: number;
-  obp: number;
-  slg: number;
-  ops: number;
-  stolenBases: number;
-  caughtStealing: number;
-}
-
-interface Splits {
-  stat: Stat | PitcherStat;
-}
-
-interface Stats {
-  splits: Splits[];
-}
-
-interface People {
-  stats: Stats[];
-  fullName: string;
-  primaryPosition: PrimaryPosition;
-}
-
-interface PersonResponse {
-  people: People[];
-}
-
-const ryanPitchers = [
-  668678,
-  592866,
-  619242,
-  615698,
-  694297,
-  660853,
-  608371,
-  628452,
-  548384,
-  554431,
-  673513
-]
-
-const ryanHitters = [
-  575929,
-  656555,
-  605141,
-  676395,
-  600869,
-  663611,
-  596019,
-  682928,
-  592885,
-  676475,
-  666181,
-  686217,
-  679032,
-  657088,
-  694192
-]
-
-const poppsPitchers = [
-  663623,
-  607192,
-  640455,
-  548389,
-  676775,
-  663855,
-  640451,
-  642397,
-  656546,
-  552640,
-  621242,
-  593576
-]
-
-const poppsHitters = [
-  553869,
-  672275,
-  607732,
-  547180,
-  663538,
-  641857,
-  669707,
-  673490,
-  621035,
-  666149,
-  641313,
-  664056,
-  641355,
-  624585
-]
-
-const nickPitchers = [
-  675911,
-  676272,
-  518876,
-  506433,
-  572020,
-  666745,
-  621381,
-  666277,
-  663362,
-  664854,
-  643511,
-  681911,
-  657240,
-  547973,
-  663432,
-]
-
-const nickHitters = [
-  672515,
-  542194,
-  624413,
-  608841,
-  663898,
-  676701,
-  669394,
-  605204,
-  642731,
-  666134,
-  665862,
-  686668,
-  641584,
-  666971,
-]
+import { nickHitters, nickPitchers, poppsHitters, poppsPitchers, ryanHitters, ryanPitchers } from './rosters';
+import { PersonResponse, Pitcher, PitcherStat, Player, Stat } from './types';
 
 async function getHitterDataAsync(personId: number, range: string): Promise<Player> {
   let dateRange = "";
   let url = "";
   switch (range) {
     case "season":
-      url = `https://statsapi.mlb.com/api/v1/people/${personId}?hydrate=stats(type=season)`;
+      url = `https://statsapi.mlb.com/api/v1/people/${personId}?hydrate=currentTeam,team,stats(type=season)`;
       break;
     case "week":
       dateRange = `startDate=${moment().subtract(7, 'days').format('MM/DD/YYYY')},endDate=${moment().format('MM/DD/YYYY')}`;
-      url = `https://statsapi.mlb.com/api/v1/people/${personId}?hydrate=stats(type=byDateRange,${dateRange})`;
+      url = `https://statsapi.mlb.com/api/v1/people/${personId}?hydrate=currentTeam,team,stats(type=byDateRange,${dateRange})`;
       break;
     case "yesterday":
       dateRange = `startDate=${moment().subtract(1, 'days').format('MM/DD/YYYY')},endDate=${moment().subtract(1, 'days').format('MM/DD/YYYY')}`;
-      url = `https://statsapi.mlb.com/api/v1/people/${personId}?hydrate=stats(type=byDateRange,${dateRange})`;
+      url = `https://statsapi.mlb.com/api/v1/people/${personId}?hydrate=currentTeam,team,stats(type=byDateRange,${dateRange})`;
       break;
     default:
       dateRange = `startDate=${moment().format('MM/DD/YYYY')},endDate=${moment().format('MM/DD/YYYY')}`;
-      url = `https://statsapi.mlb.com/api/v1/people/${personId}?hydrate=stats(type=byDateRange,${dateRange})`;
+      url = `https://statsapi.mlb.com/api/v1/people/${personId}?hydrate=currentTeam,team,stats(type=byDateRange,${dateRange})`;
       break;
   }
   const response = await fetch(url);
   if (response.ok) {
     const personResponse: PersonResponse = await response.json();
-    const stat = personResponse.people[0]?.stats[0]?.splits[0]?.stat as Stat;
+    const stat = personResponse.people[0]?.stats ? personResponse.people[0]?.stats[0]?.splits[0]?.stat as Stat : undefined;
+    const isMlb = personResponse.people[0].currentTeam.sport.id === 1;
     return {
       id: personId,
       position: personResponse.people[0].primaryPosition.abbreviation,
-      name: personResponse.people[0].fullName,
+      name: personResponse.people[0].fullName + (!isMlb ? "*" : "" ),
       atBats: stat?.atBats,
       hits: stat?.hits,
       homeRuns: stat?.homeRuns,
@@ -235,29 +61,30 @@ async function getPitcherDataAsync(personId: number, range: string): Promise<Pit
   let url = "";
   switch (range) {
     case "season":
-      url = `https://statsapi.mlb.com/api/v1/people/${personId}?hydrate=stats(type=season)`;
+      url = `https://statsapi.mlb.com/api/v1/people/${personId}?hydrate=currentTeam,team,stats(type=season)`;
       break;
     case "week":
       dateRange = `startDate=${moment().subtract(7, 'days').format('MM/DD/YYYY')},endDate=${moment().format('MM/DD/YYYY')}`;
-      url = `https://statsapi.mlb.com/api/v1/people/${personId}?hydrate=stats(type=byDateRange,${dateRange})`;
+      url = `https://statsapi.mlb.com/api/v1/people/${personId}?hydrate=currentTeam,team,stats(type=byDateRange,${dateRange})`;
       break;
     case "yesterday":
       dateRange = `startDate=${moment().subtract(1, 'days').format('MM/DD/YYYY')},endDate=${moment().subtract(1, 'days').format('MM/DD/YYYY')}`;
-      url = `https://statsapi.mlb.com/api/v1/people/${personId}?hydrate=stats(type=byDateRange,${dateRange})`;
+      url = `https://statsapi.mlb.com/api/v1/people/${personId}?hydrate=currentTeam,team,stats(type=byDateRange,${dateRange})`;
       break;
     default:
       dateRange = `startDate=${moment().format('MM/DD/YYYY')},endDate=${moment().format('MM/DD/YYYY')}`;
-      url = `https://statsapi.mlb.com/api/v1/people/${personId}?hydrate=stats(type=byDateRange,${dateRange})`;
+      url = `https://statsapi.mlb.com/api/v1/people/${personId}?hydrate=currentTeam,team,stats(type=byDateRange,${dateRange})`;
       break;
   }
   const response = await fetch(url);
   if (response.ok) {
     const personResponse: PersonResponse = await response.json();
-    const stat = personResponse.people[0]?.stats[0]?.splits[0]?.stat as PitcherStat;
+    const stat = personResponse.people[0]?.stats ? personResponse.people[0]?.stats[0]?.splits[0]?.stat as PitcherStat : undefined;
+    const isMlb = personResponse.people[0].currentTeam.sport.id === 1;
     return {
       id: personId,
       position: personResponse.people[0].primaryPosition.abbreviation,
-      name: personResponse.people[0].fullName,
+      name: personResponse.people[0].fullName + (!isMlb ? "*" : "" ),
       gamesPlayed: stat?.gamesPlayed ? +stat.gamesPlayed : undefined,
       gamesStarted: stat?.gamesStarted ? +stat.gamesStarted : undefined,
       inningsPitched: stat?.inningsPitched,
@@ -313,17 +140,17 @@ function App() {
       players.push(hitter);
       if (hitter.atBats) {
         playerTotal.atBats! += hitter.atBats;
-        playerTotal.hits! += hitter.hits;
-        playerTotal.homeRuns! += hitter.homeRuns;
-        playerTotal.baseOnBalls! += hitter.baseOnBalls;
-        playerTotal.stolenBases! += hitter.stolenBases;
-        playerTotal.caughtStealing! += hitter.caughtStealing;
+        playerTotal.hits! += hitter.hits ?? 0;
+        playerTotal.homeRuns! += hitter.homeRuns ?? 0;
+        playerTotal.baseOnBalls! += hitter.baseOnBalls ?? 0;
+        playerTotal.stolenBases! += hitter.stolenBases ?? 0;
+        playerTotal.caughtStealing! += hitter.caughtStealing ?? 0;
       }
     }
 
     if (playerTotal.atBats && playerTotal.atBats > 0) {
-      playerTotal.avg = +(playerTotal.hits / playerTotal.atBats).toFixed(3);
-      playerTotal.obp = +((playerTotal.hits + playerTotal.baseOnBalls) / playerTotal.atBats).toFixed(3);
+      playerTotal.avg = +(playerTotal.hits! / playerTotal.atBats).toFixed(3);
+      playerTotal.obp = +((playerTotal.hits! + playerTotal.baseOnBalls!) / playerTotal.atBats).toFixed(3);
     }
 
     setPlayerTotals(playerTotal);
