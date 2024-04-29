@@ -32,6 +32,7 @@ async function getHitterDataAsync(personId: number, range: string): Promise<Play
       break;
   }
   const response = await fetch(url);
+
   if (response.ok) {
     const personResponse: PersonResponse = await response.json();
     const stat = personResponse.people[0]?.stats ? personResponse.people[0]?.stats[0]?.splits[0]?.stat as Stat : undefined;
@@ -108,6 +109,11 @@ function App() {
   const [user, setUser] = useState<string>("Nick");
 
   const loadHitterData = async (range: string) => {
+    // const response2 = await fetch("https://8kyrux6q4c.execute-api.us-east-1.amazonaws.com/players");
+    // if (response2.ok) {
+    //   const test = await response2.json();
+    //   console.log(test)
+    // }
     let userPlayers: number[] = [];
     if (user === 'Nick') {
       userPlayers = nickHitters;
