@@ -39,6 +39,8 @@ export const ryanPitchers = [
     691718, // Crow-Armst, Pe
     571466, // Barnhart, Tu
     621466, // Stewart, DJ
+    592696, // Rosario, Ed
+    660644, // Brujan, Vi
   ]
   
   export const poppsPitchers = [
@@ -60,7 +62,9 @@ export const ryanPitchers = [
     592662, // Ray, Ro
     592426, // Jackson, Lu
     663542, // Hudson, Br
-    694738. // Roupp, La
+    694738, // Roupp, La
+    657044, // Thompson, Ry
+    669062, // Miller, Er
   ]
   
   export const poppsHitters = [
@@ -83,6 +87,7 @@ export const ryanPitchers = [
     666185, // Carlson, Dy
     660271, // Ohtani
     605361, // Martini, Ni
+    696285, // Young, Ja
   ]
   
   export const nickPitchers = [
@@ -104,7 +109,9 @@ export const ryanPitchers = [
     663432, // Rainey, Ta
     665795, // Cabrera, Ed
     623149, // Sewald, Pa
-    676395 // Garcia, Ro
+    676395, // Garcia, Ro
+    571656, // Farmer, Bu
+    605452, // Ross, Joe
   ]
   
   export const nickHitters = [
@@ -125,5 +132,6 @@ export const ryanPitchers = [
     678894, // Peguero, Li
     686894, // Wiemer, Jo
     669003, // Mitchell, Ga
-    666703, // Rosario, Eu
+    545121, // Vargas, Il
+    677942, // Alexander, Bl
   ]
