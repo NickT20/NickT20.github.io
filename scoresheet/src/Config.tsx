@@ -382,7 +382,7 @@ function Config() {
 //     }
 // ];
 
-        json.sort((a, b) => a.order - b.order);
+        json.sort((a: ApiPlayer, b: ApiPlayer) => a.order - b.order);
 
         
         const promises: Promise<void>[] = [];

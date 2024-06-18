@@ -8,7 +8,7 @@ export interface ApiPlayer {
 }
 
 export interface Player {
-    id: number;
+    id: string;
     position: string;
     name: string;
     atBats?: number;
@@ -24,7 +24,7 @@ export interface Player {
   }
   
   export interface Pitcher {
-    id: number;
+    id: string;
     position?: string;
     name?: string;
     gamesPlayed?: number;

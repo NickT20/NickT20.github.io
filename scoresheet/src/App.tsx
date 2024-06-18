@@ -113,7 +113,7 @@ function App() {
 
     const players = [];
     const playerTotal: Player = {
-      id: 0,
+      id: '0',
       position: "",
       name: "Total",
       atBats: 0,
@@ -154,7 +154,7 @@ function App() {
     const players: Pitcher[] = [];
 
     const playerTotal: Pitcher = {
-      id: 0,
+      id: '0',
       gamesPlayed: 0,
       gamesStarted: 0,
       baseOnBalls: 0,
