@@ -1,3 +1,12 @@
+export interface ApiPlayer {
+  playerId: string;
+  teamId: number;
+  hitter: boolean;
+  farm: boolean;
+  starter: boolean;
+  order: number;
+}
+
 export interface Player {
     id: number;
     position: string;

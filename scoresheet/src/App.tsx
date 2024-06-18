@@ -8,10 +8,10 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { Button, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Stack } from '@mui/material';
-import { nickHitters, nickPitchers, poppsHitters, poppsPitchers, ryanHitters, ryanPitchers } from './rosters';
-import { PersonResponse, Pitcher, PitcherStat, Player, Stat } from './types';
+import { ApiPlayer, PersonResponse, Pitcher, PitcherStat, Player, Stat } from './types';
+import { useNavigate } from 'react-router-dom';
 
-async function getHitterDataAsync(personId: number, range: string): Promise<Player> {
+async function getHitterDataAsync(personId: string, range: string): Promise<Player> {
   let dateRange = "";
   let url = "";
   switch (range) {
@@ -57,7 +57,7 @@ async function getHitterDataAsync(personId: number, range: string): Promise<Play
   return Promise.reject();
 }
 
-async function getPitcherDataAsync(personId: number, range: string): Promise<Pitcher> {
+async function getPitcherDataAsync(personId: string, range: string): Promise<Pitcher> {
   let dateRange = "";
   let url = "";
   switch (range) {
@@ -107,24 +107,11 @@ function App() {
   const [playerTotals, setPlayerTotals] = useState<Player | undefined>(undefined);
   const [pitchersTotals, setPitcherTotals] = useState<Pitcher | undefined>(undefined);
   const [user, setUser] = useState<string>("Nick");
+  const navigate = useNavigate(); 
 
-  const loadHitterData = async (range: string) => {
-    // const response2 = await fetch("https://8kyrux6q4c.execute-api.us-east-1.amazonaws.com/players");
-    // if (response2.ok) {
-    //   const test = await response2.json();
-    //   console.log(test)
-    // }
-    let userPlayers: number[] = [];
-    if (user === 'Nick') {
-      userPlayers = nickHitters;
-    } else if (user === 'Popps') {
-      userPlayers = poppsHitters;
-    } else  {
-      userPlayers = ryanHitters;
-    }
+  const loadHitterData = async (userPlayers: ApiPlayer[], range: string) => {
 
     const players = [];
-
     const playerTotal: Player = {
       id: 0,
       position: "",
@@ -142,7 +129,7 @@ function App() {
     };
 
     for (const userPlayer of userPlayers) {
-      const hitter = await getHitterDataAsync(userPlayer, range)
+      const hitter = await getHitterDataAsync(userPlayer.playerId, range)
       players.push(hitter);
       if (hitter.atBats) {
         playerTotal.atBats! += hitter.atBats;
@@ -163,16 +150,7 @@ function App() {
     setPlayers(players);
   }
 
-  const loadPitcherData = async (range: string) => {
-    let userPlayers: number[] = [];
-    if (user === 'Nick') {
-      userPlayers = nickPitchers;
-    } else if (user === 'Popps') {
-      userPlayers = poppsPitchers;
-    } else  {
-      userPlayers = ryanPitchers;
-    }
-
+  const loadPitcherData = async (userPlayers: ApiPlayer[], range: string) => {
     const players: Pitcher[] = [];
 
     const playerTotal: Pitcher = {
@@ -191,7 +169,7 @@ function App() {
     };
 
     for (const userPlayer of userPlayers) {
-      const pitcher = await getPitcherDataAsync(userPlayer, range)
+      const pitcher = await getPitcherDataAsync(userPlayer.playerId, range)
       players.push(pitcher);
       if (pitcher.gamesPlayed) {
         playerTotal.gamesPlayed! += pitcher.gamesPlayed;
@@ -217,6 +195,29 @@ function App() {
       setUser(event.currentTarget.value);
   };
 
+  const getTeamId = () => {
+    switch(user) {
+      case 'Nick':
+        return 1;
+      case 'Popps': 
+        return 2;
+      default:
+        return 3;
+    }
+  }
+
+  const loadData = async (range: string) => {
+    let players: ApiPlayer[] = [];
+    const response = await fetch(`https://8kyrux6q4c.execute-api.us-east-1.amazonaws.com/players?teamId=${getTeamId()}`);
+    if (response.ok) {
+      players = await response.json();
+    }
+
+    players.sort((a, b) => a.order - b.order);
+    loadHitterData(players.filter(p => p.hitter), range);
+    loadPitcherData(players.filter(p => !p.hitter), range);
+  }
+
   return (
     <>
       <FormControl>
@@ -236,28 +237,29 @@ function App() {
       <hr />
       <Stack direction="row" spacing={2} justifyContent="center">
           <Button variant="contained" onClick={() => {
-              loadPitcherData("season");
-              loadHitterData("season");
+              loadData("season");
             }}>
             Season
           </Button>
           <Button variant="contained" onClick={() => {
-              loadPitcherData("week");
-              loadHitterData("week");
+              loadData("week");
             }}>
             Last 7 Days
           </Button>
           <Button variant="contained" onClick={() => {
-              loadPitcherData("yesterday");
-              loadHitterData("yesterday");
+              loadData("yesterday");
             }}>
             Yesterday
           </Button>
           <Button variant="contained" onClick={() => {
-              loadPitcherData("today");
-              loadHitterData("today");
+              loadData("today");
             }}>
             Today
+          </Button>
+          <Button variant="contained" onClick={() => { 
+            navigate(`/config?teamId=${getTeamId()}`);
+          }}>
+            Config
           </Button>
       </Stack>
       <h2>Hitters</h2>
