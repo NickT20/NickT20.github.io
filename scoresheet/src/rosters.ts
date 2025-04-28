@@ -44,50 +44,47 @@ export const ryanPitchers = [
   ]
   
   export const poppsPitchers = [
-    663623, // Irvin, Ja
-    607192, // Glasnow, Y
-    640455, // Manaea, Se
-    548389, // Stripling, Ro
-    676775, // Winn, Ke
-    663855, // Hicks, Jo
-    640451, // Harvey, Hu
-    642397, // Soto, Gr
-    656546, // Hoffman, Je
-    552640, // Kittredge, An
-    621242, // Diaz, Ed
-    593576, // Neris, He
-    489119, // Wade Miley
-    666129, // Garrett, Br
-    621366, // Borucki, Ry
-    592662, // Ray, Ro
-    592426, // Jackson, Lu
-    663542, // Hudson, Br
-    694738, // Roupp, La
-    657044, // Thompson, Ry
-    669062, // Miller, Er
+    669203,
+    668881,
+    641482,
+    645261,
+    434378,
+    669160,
+    656731,
+    669062,
+    678495,
+    694477,
+    606996,
+    647336,
+    489446,
+    678606,
+    593974,
+    642152,
+    642701,
+    592094,
+    668941,
+    622786,
+    668338
   ]
   
   export const poppsHitters = [
-    553869, // Diaz, El
-    672275, // Bailey, Pa
-    607732, // Stallings, Ja
-    547180, // Harper, Br
-    663538, // Hoerner, Ni
-    641857, // McMahon, Ry
-    669707, // Triolo, Ja
-    673490, // Kim, Ha
-    621035, // Taylor, Ch
-    666149, // Fitzgerald, Ty
-    641313, // Anderson, Tim
-    664056, // Bader, Ha
-    641355, // Bellinger, Co
-    624585, // Soler, Jo
-    670770, // Friedl, TJ
-    518792, // Heyward, Ja
-    666185, // Carlson, Dy
-    660271, // Ohtani
-    605361, // Martini, Ni
-    696285, // Young, Ja
+    672275,
+    660688,
+    669087,
+    624413,
+    670223,
+    668930,
+    669707,
+    656305,
+    571771,
+    621020,
+    500743,
+    686668,
+    682998,
+    676475,
+    686217,
+    671218,
+    682641
   ]
   
   export const nickPitchers = [
@@ -132,4 +129,4 @@ export const ryanPitchers = [
     650559, // DeLaCruz
     542303, // McCutchen
     642731 // Estrada
-  ]
+  ] 
