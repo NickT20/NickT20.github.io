@@ -91,47 +91,45 @@ export const ryanPitchers = [
   ]
   
   export const nickPitchers = [
-    683003, // Jones, Ja
-    675911, // Strider, Sp
-    676272, // Miller, Bo
-    518876, // Kelly, Me
-    506433, // Darvish, Yu
-    572020, // Paxton, Ja
-    666745, // Brito, Jh
-    621381, // Strahm, Ma
-    666277, // Soriano, Ge
-    663362, // Waldron, Ma
-    664854, // Helsley, Ry
-    643511, // Rogers, Ty
-    681911, // Vesia, Al
-    657240, // Merryweather, Ju
-    547973, // Chapman, Ar
-    663432, // Rainey, Ta
-    665795, // Cabrera, Ed
-    623149, // Sewald, Pa
-    676395, // Garcia, Ro
-    571656, // Farmer, Bu
-    605452, // Ross, Joe
+    650633, // King
+    607200, // Fredde
+    601713, // Pivetta
+    592866, // Williams
+    701656, // Henderson
+    656288, // Canning
+    676130, // Butto
+    669194, // Nelson
+    689017, // Knack
+    625643, // Lopex
+    628452, // Iglesias
+    670280, // Bednar
+    592773, // Stanek
+    657240, // Merryweather
+    676263, // Dreyer
+    656730, // Megill
+    664747, // Diaz
+    605347, // Lopez
+    663878, // Pearson
+    640455, // Manaea
+    687792 // Herz
   ]
   
   export const nickHitters = [
-    672515, // Moreno, Ga
-    542194, // Bethancourt, 
-    624413, // Alonso, Pe
-    608841, // Meneses, Jo
-    663898, // Rodgers, Br
-    676701, // Trejo, Al
-    669394, // Burger, Ja
-    605204, // Davis, JD
-    642731, // Estrada, Th
-    666134, // Jones, No
-    665862, // Chisholm, Ja
-    686668, // Doyle, Br
-    641584, // Fraley, Ja
-    666971, // Gurriel, Lo
-    678894, // Peguero, Li
-    686894, // Wiemer, Jo
-    669003, // Mitchell, Ga
-    545121, // Vargas, Il
-    677942, // Alexander, Bl
+    661388, // Contreras
+    553869, // Diaz
+    605137, // Bell
+    457759, // Turner
+    650333, // Arraez
+    671277, // Garcia
+    553993, // Suarez
+    607208, // Turner
+    657557, // DeJong
+    665742, // Soto
+    592206, // castellan
+    664023, // Happ
+    664983, // McCarthy
+    681624, // Pages
+    650559, // DeLaCruz
+    542303, // McCutchen
+    642731 // Estrada
   ]
