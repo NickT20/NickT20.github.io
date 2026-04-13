@@ -201,8 +201,10 @@ function App() {
         return 1;
       case 'Popps': 
         return 2;
-      default:
+      case 'Ryan': 
         return 3;
+      default:
+        return 4;
     }
   }
 
@@ -232,6 +234,7 @@ function App() {
           <FormControlLabel value="Nick" control={<Radio />} label="Nick" />
           <FormControlLabel value="Popps" control={<Radio />} label="Popps" />
           <FormControlLabel value="Ryan" control={<Radio />} label="Ryan" />
+          <FormControlLabel value="Chris" control={<Radio />} label="Chris" />
         </RadioGroup>
       </FormControl>
       <hr />
