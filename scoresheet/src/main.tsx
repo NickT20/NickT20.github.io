@@ -4,9 +4,12 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
+import { createTheme, ThemeProvider, CssBaseline } from "@mui/material";
 import "./index.css";
 import App from "./App";
 import Config from "./Config";
+
+const darkTheme = createTheme({ palette: { mode: "dark" } });
 
 const router = createBrowserRouter([
   {
@@ -22,6 +25,9 @@ const router = createBrowserRouter([
 const domNode = document.getElementById('root')!;
 ReactDOM.createRoot(domNode).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+      <RouterProvider router={router} />
+    </ThemeProvider>
   </React.StrictMode>
 );
