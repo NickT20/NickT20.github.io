@@ -1,19 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { ApiPlayer, PersonResponse } from './types';
+import { ApiPlayer, PersonResponse, Stat } from './types';
+import { suggestBattingOrder } from './lineup';
 import {
   Button, FormControl, FormControlLabel, FormLabel, IconButton, Radio,
   RadioGroup, Stack, TextField, Typography, Paper, Divider, CircularProgress,
 } from '@mui/material';
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import DeleteIcon from '@mui/icons-material/Delete';
-import {
-  DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  SortableContext, verticalListSortingStrategy, useSortable, arrayMove,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 const API_BASE = 'https://8kyrux6q4c.execute-api.us-east-1.amazonaws.com';
 const MLB_BASE = 'https://statsapi.mlb.com/api/v1';
@@ -29,38 +23,36 @@ interface ConfigPlayer extends ApiPlayer {
   name: string;
 }
 
-interface SortableRowProps {
+interface RosterRowProps {
   player: ConfigPlayer;
-  onRemove: (playerId: string) => void;
+  isFirst: boolean;
+  isLast: boolean;
+  onMoveUp: (playerId: string) => void;
+  onMoveDown: (playerId: string) => void;
 }
 
-function SortableRow({ player, onRemove }: SortableRowProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: player.playerId });
-
+function RosterRow({ player, isFirst, isLast, onMoveUp, onMoveDown }: RosterRowProps) {
   return (
     <Paper
-      ref={setNodeRef}
       variant="outlined"
       sx={{
         display: 'flex',
         alignItems: 'center',
         px: 1,
         py: 0.5,
-        gap: 1,
-        opacity: isDragging ? 0.5 : 1,
-        transform: CSS.Transform.toString(transform),
-        transition,
-        cursor: isDragging ? 'grabbing' : 'default',
+        gap: 0.5,
       }}
     >
-      <span {...attributes} {...listeners} style={{ cursor: 'grab', display: 'flex', color: '#aaa' }}>
-        <DragIndicatorIcon fontSize="small" />
-      </span>
+      <Stack>
+        <IconButton size="small" disabled={isFirst} onClick={() => onMoveUp(player.playerId)}>
+          <KeyboardArrowUpIcon fontSize="small" />
+        </IconButton>
+        <IconButton size="small" disabled={isLast} onClick={() => onMoveDown(player.playerId)}>
+          <KeyboardArrowDownIcon fontSize="small" />
+        </IconButton>
+      </Stack>
       <Typography sx={{ flex: 1 }}>{player.name}</Typography>
       <Typography variant="caption" color="text.secondary">{player.playerId}</Typography>
-      <IconButton size="small" onClick={() => onRemove(player.playerId)}>
-        <DeleteIcon fontSize="small" />
-      </IconButton>
     </Paper>
   );
 }
@@ -77,11 +69,10 @@ function Config() {
   const [pitchers, setPitchers] = useState<ConfigPlayer[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [suggesting, setSuggesting] = useState(false);
 
   const [newPlayerId, setNewPlayerId] = useState('');
   const [newPlayerType, setNewPlayerType] = useState<'hitter' | 'pitcher'>('hitter');
-
-  const sensors = useSensors(useSensor(PointerSensor));
 
   const fetchRoster = async (teamId: number) => {
     setLoading(true);
@@ -116,18 +107,43 @@ function Config() {
     setSelectedTeam(team);
   };
 
-  const handleDragEnd = (event: DragEndEvent, list: ConfigPlayer[], setList: (l: ConfigPlayer[]) => void) => {
-    const { active, over } = event;
-    if (over && active.id !== over.id) {
-      const oldIndex = list.findIndex(p => p.playerId === active.id);
-      const newIndex = list.findIndex(p => p.playerId === over.id);
-      setList(arrayMove(list, oldIndex, newIndex));
-    }
+  const moveInList = (list: ConfigPlayer[], playerId: string, direction: -1 | 1) => {
+    const index = list.findIndex(p => p.playerId === playerId);
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= list.length) return list;
+    const updated = [...list];
+    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+    return updated;
   };
 
-  const handleRemove = (playerId: string, isHitter: boolean) => {
-    if (isHitter) setHitters(h => h.filter(p => p.playerId !== playerId));
-    else setPitchers(p => p.filter(p => p.playerId !== playerId));
+  const handleMoveUp = (playerId: string, isHitter: boolean) => {
+    if (isHitter) setHitters(h => moveInList(h, playerId, -1));
+    else setPitchers(p => moveInList(p, playerId, -1));
+  };
+
+  const handleMoveDown = (playerId: string, isHitter: boolean) => {
+    if (isHitter) setHitters(h => moveInList(h, playerId, 1));
+    else setPitchers(p => moveInList(p, playerId, 1));
+  };
+
+  const handleSuggestLineup = async () => {
+    setSuggesting(true);
+
+    const statsById = new Map<string, Stat>();
+    await Promise.all(hitters.map(async p => {
+      try {
+        const res = await fetch(`${MLB_BASE}/people/${p.playerId}?hydrate=stats(type=season)`);
+        if (!res.ok) return;
+        const json: PersonResponse = await res.json();
+        const stat = json.people[0]?.stats?.[0]?.splits?.[0]?.stat as Stat | undefined;
+        if (stat) statsById.set(p.playerId, stat);
+      } catch {
+        // no stats available; player is treated as a blank slate in the ordering
+      }
+    }));
+
+    setHitters(current => suggestBattingOrder(current, statsById));
+    setSuggesting(false);
   };
 
   const handleAddPlayer = () => {
@@ -230,33 +246,50 @@ function Config() {
 
       {!loading && (
         <>
-          <Typography variant="h6">Hitters</Typography>
-          <Typography variant="caption" color="text.secondary">Drag to reorder</Typography>
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={e => handleDragEnd(e, hitters, setHitters)}>
-            <SortableContext items={hitters.map(p => p.playerId)} strategy={verticalListSortingStrategy}>
-              <Stack spacing={0.5} sx={{ mt: 1, mb: 3 }}>
-                {hitters.length === 0 && <Typography variant="body2" color="text.secondary">No hitters</Typography>}
-                {hitters.map(p => (
-                  <SortableRow key={p.playerId} player={p} onRemove={id => handleRemove(id, true)} />
-                ))}
-              </Stack>
-            </SortableContext>
-          </DndContext>
+          <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
+            <Typography variant="h6">Hitters</Typography>
+            <Button
+              size="small"
+              variant="outlined"
+              disabled={suggesting || hitters.length < 2}
+              onClick={handleSuggestLineup}
+            >
+              {suggesting ? 'Suggesting…' : 'Suggest Lineup'}
+            </Button>
+          </Stack>
+          <Typography variant="caption" color="text.secondary">
+            Orders by OBP (1-2 hole), power/OPS (3-6 hole), then speed (7-9 hole) — based on Scoresheet's lineup strategy guide
+          </Typography>
+          <Stack spacing={0.5} sx={{ mt: 1, mb: 3 }}>
+            {hitters.length === 0 && <Typography variant="body2" color="text.secondary">No hitters</Typography>}
+            {hitters.map((p, i) => (
+              <RosterRow
+                key={p.playerId}
+                player={p}
+                isFirst={i === 0}
+                isLast={i === hitters.length - 1}
+                onMoveUp={id => handleMoveUp(id, true)}
+                onMoveDown={id => handleMoveDown(id, true)}
+              />
+            ))}
+          </Stack>
 
           <Divider sx={{ mb: 2 }} />
 
           <Typography variant="h6">Pitchers</Typography>
-          <Typography variant="caption" color="text.secondary">Drag to reorder</Typography>
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={e => handleDragEnd(e, pitchers, setPitchers)}>
-            <SortableContext items={pitchers.map(p => p.playerId)} strategy={verticalListSortingStrategy}>
-              <Stack spacing={0.5} sx={{ mt: 1 }}>
-                {pitchers.length === 0 && <Typography variant="body2" color="text.secondary">No pitchers</Typography>}
-                {pitchers.map(p => (
-                  <SortableRow key={p.playerId} player={p} onRemove={id => handleRemove(id, false)} />
-                ))}
-              </Stack>
-            </SortableContext>
-          </DndContext>
+          <Stack spacing={0.5} sx={{ mt: 1 }}>
+            {pitchers.length === 0 && <Typography variant="body2" color="text.secondary">No pitchers</Typography>}
+            {pitchers.map((p, i) => (
+              <RosterRow
+                key={p.playerId}
+                player={p}
+                isFirst={i === 0}
+                isLast={i === pitchers.length - 1}
+                onMoveUp={id => handleMoveUp(id, false)}
+                onMoveDown={id => handleMoveDown(id, false)}
+              />
+            ))}
+          </Stack>
         </>
       )}
     </div>
