@@ -183,7 +183,7 @@ function App() {
         </RadioGroup>
       </FormControl>
 
-      <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 2 }}>
+      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2 }}>
         {(['Season', 'Last 7 Days', 'Yesterday', 'Today'] as const).map((label, i) => {
           const range = ['season', 'week', 'yesterday', 'today'][i];
           return (

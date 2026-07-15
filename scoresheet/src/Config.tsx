@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { ApiPlayer, PersonResponse, Stat } from './types';
-import { suggestBattingOrder } from './lineup';
+import { ApiPlayer, PersonResponse } from './types';
 import {
   Button, FormControl, FormControlLabel, FormLabel, IconButton, Radio,
   RadioGroup, Stack, TextField, Typography, Paper, Divider, CircularProgress,
@@ -69,7 +68,6 @@ function Config() {
   const [pitchers, setPitchers] = useState<ConfigPlayer[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [suggesting, setSuggesting] = useState(false);
 
   const [newPlayerId, setNewPlayerId] = useState('');
   const [newPlayerType, setNewPlayerType] = useState<'hitter' | 'pitcher'>('hitter');
@@ -124,26 +122,6 @@ function Config() {
   const handleMoveDown = (playerId: string, isHitter: boolean) => {
     if (isHitter) setHitters(h => moveInList(h, playerId, 1));
     else setPitchers(p => moveInList(p, playerId, 1));
-  };
-
-  const handleSuggestLineup = async () => {
-    setSuggesting(true);
-
-    const statsById = new Map<string, Stat>();
-    await Promise.all(hitters.map(async p => {
-      try {
-        const res = await fetch(`${MLB_BASE}/people/${p.playerId}?hydrate=stats(type=season)`);
-        if (!res.ok) return;
-        const json: PersonResponse = await res.json();
-        const stat = json.people[0]?.stats?.[0]?.splits?.[0]?.stat as Stat | undefined;
-        if (stat) statsById.set(p.playerId, stat);
-      } catch {
-        // no stats available; player is treated as a blank slate in the ordering
-      }
-    }));
-
-    setHitters(current => suggestBattingOrder(current, statsById));
-    setSuggesting(false);
   };
 
   const handleAddPlayer = () => {
@@ -246,20 +224,7 @@ function Config() {
 
       {!loading && (
         <>
-          <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
-            <Typography variant="h6">Hitters</Typography>
-            <Button
-              size="small"
-              variant="outlined"
-              disabled={suggesting || hitters.length < 2}
-              onClick={handleSuggestLineup}
-            >
-              {suggesting ? 'Suggesting…' : 'Suggest Lineup'}
-            </Button>
-          </Stack>
-          <Typography variant="caption" color="text.secondary">
-            Orders by OBP (1-2 hole), power/OPS (3-6 hole), then speed (7-9 hole) — based on Scoresheet's lineup strategy guide
-          </Typography>
+          <Typography variant="h6">Hitters</Typography>
           <Stack spacing={0.5} sx={{ mt: 1, mb: 3 }}>
             {hitters.length === 0 && <Typography variant="body2" color="text.secondary">No hitters</Typography>}
             {hitters.map((p, i) => (
